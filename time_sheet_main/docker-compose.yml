@@ -1,0 +1,33 @@
+volumes:
+  dbdata: {}
+
+services:
+  django:
+    &django
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    image: project
+    volumes:
+      - ./backend:/home/user/app/backend:rw  # ✅ Correctly mount backend directory
+    env_file:
+      - ./.envs/local/.django
+    ports:
+      - 8001:8000
+    depends_on:
+      - db
+
+  db:
+    image: "postgres:alpine"
+    env_file:
+      - ./.envs/local/.django
+    ports:
+      - "5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data:delegated
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8
